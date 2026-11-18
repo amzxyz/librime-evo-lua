@@ -4,7 +4,7 @@
 
 TEST(LuaRuntime, BundledJitAndLibraries) {
   Lua lua;
-  lua.to_state([](lua_State *state) {
+  lua.to_state([](lua_State* state) {
     const int result = luaL_dostring(state, R"(
       assert(jit.version:match('^LuaJIT 2%.1'))
       assert(jit.status())
@@ -37,7 +37,7 @@ TEST(LuaRuntime, BundledJitAndLibraries) {
 
 TEST(LuaRuntime, CoroutineTranslation) {
   Lua lua;
-  lua.to_state([](lua_State *state) {
+  lua.to_state([](lua_State* state) {
     ASSERT_EQ(LUA_OK, luaL_dostring(state, R"(
       function translate()
         yield('\xe4\xbd\xa0')
@@ -47,7 +47,7 @@ TEST(LuaRuntime, CoroutineTranslation) {
     )"));
   });
   auto thread = lua.newthread(lua.getglobal("translate"));
-  for (const auto &text : {"\xe4\xbd\xa0", "\xe4\xbd\xa0\xe5\xa5\xbd"}) {
+  for (const auto& text : {"\xe4\xbd\xa0", "\xe4\xbd\xa0\xe5\xa5\xbd"}) {
     auto result = lua.resume<std::string>(thread);
     ASSERT_TRUE(result.ok());
     EXPECT_EQ(text, result.get());
@@ -59,7 +59,7 @@ TEST(LuaRuntime, CoroutineTranslation) {
 
 TEST(LuaRuntime, WideIntegerBinding) {
   Lua lua;
-  lua.to_state([](lua_State *state) {
+  lua.to_state([](lua_State* state) {
     constexpr unsigned long long value = 1700000000000ULL;
     LuaType<unsigned long long>::pushdata(state, value);
     EXPECT_EQ(value, LuaType<unsigned long long>::todata(state, -1));
@@ -67,7 +67,7 @@ TEST(LuaRuntime, WideIntegerBinding) {
   });
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
