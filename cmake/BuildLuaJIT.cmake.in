@@ -5,7 +5,7 @@ file(MAKE_DIRECTORY "@luajit_build_dir@/objects")
 set(object_names "@luajit_object_names@")
 file(READ "@luajit_source@/.relver" release)
 string(STRIP "${release}" release)
-if(NOT release MATCHES "^[0-9]+$")
+if(NOT release MATCHES "^([0-9]+|ROLLING)$")
   execute_process(COMMAND "@GIT_EXECUTABLE@" -C "@luajit_source@" log -1 --format=%ct
                   OUTPUT_VARIABLE release OUTPUT_STRIP_TRAILING_WHITESPACE
                   RESULT_VARIABLE result)
