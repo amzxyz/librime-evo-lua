@@ -1,0 +1,55 @@
+name: Build with librime-evo
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {cc: gcc, cxx: g++}
+          - {cc: clang, cxx: clang++}
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+      RIME_PLUGINS: lua
+    steps:
+      - name: Checkout librime-evo
+        uses: actions/checkout@v7
+        with:
+          repository: amzxyz/librime-evo
+          ref: main
+          path: evo
+
+      - name: Initialize core dependencies
+        run: git -C evo submodule update --init --recursive -- deps
+
+      - name: Checkout Lua and LuaJIT
+        uses: actions/checkout@v7
+        with:
+          path: evo/plugins/lua
+          submodules: recursive
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake ninja-build \
+            libboost-regex-dev libgtest-dev libyaml-cpp-dev libleveldb-dev libmarisa-dev
+
+      - name: Configure
+        run: >-
+          cmake -S evo -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_MERGED_PLUGINS=ON -DENABLE_EXTERNAL_PLUGINS=OFF -DBUILD_TEST=ON
+
+      - name: Build and test
+        run: |
+          cmake --build build -j2
+          ctest --test-dir build --output-on-failure

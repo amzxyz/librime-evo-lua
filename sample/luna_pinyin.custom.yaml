@@ -1,0 +1,4 @@
+patch:
+  engine/translators/+:
+    - lua_translator@*table_translator@translator
+    - lua_translator@*script_translator@cangjie
