@@ -53,3 +53,52 @@ jobs:
         run: |
           cmake --build build -j2
           ctest --test-dir build --output-on-failure
+
+  mingw:
+    runs-on: windows-latest
+    env:
+      RIME_PLUGINS: lua
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Install MSYS2 build dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            git
+            base-devel
+            mingw-w64-ucrt-x86_64-toolchain
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-boost
+            mingw-w64-ucrt-x86_64-gtest
+            mingw-w64-ucrt-x86_64-yaml-cpp
+            mingw-w64-ucrt-x86_64-leveldb
+            mingw-w64-ucrt-x86_64-marisa
+
+      - name: Checkout librime-evo
+        uses: actions/checkout@v7
+        with:
+          repository: amzxyz/librime-evo
+          ref: main
+          path: evo
+
+      - name: Initialize core dependencies
+        run: git -C evo submodule update --init --recursive -- deps
+
+      - name: Checkout Lua and LuaJIT
+        uses: actions/checkout@v7
+        with:
+          path: evo/plugins/lua
+          submodules: recursive
+
+      - name: Build and test with native CMake and Ninja
+        run: |
+          cmake -S evo -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_MERGED_PLUGINS=ON -DENABLE_EXTERNAL_PLUGINS=OFF -DBUILD_TEST=ON
+          cmake --build build -j2
+          cp build/bin/librime.dll build/test/
+          ctest --test-dir build --output-on-failure

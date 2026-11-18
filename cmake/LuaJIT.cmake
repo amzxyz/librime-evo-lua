@@ -8,14 +8,19 @@ file(GLOB_RECURSE luajit_sources CONFIGURE_DEPENDS "${luajit_source}/*")
 list(FILTER luajit_sources EXCLUDE REGEX "/[.]git(/|$)")
 list(APPEND luajit_sources "${luajit_source}/.relver")
 if(EXISTS "${luajit_source}/.git")
-  find_package(Git REQUIRED)
-  execute_process(COMMAND "${GIT_EXECUTABLE}" -C "${luajit_source}" rev-parse --git-path HEAD
+  find_package(Git 2.31 REQUIRED)
+  # MSYS Git can return /c/... absolute paths that native Windows CMake cannot
+  # use as build dependencies. Resolve a relative Git path with CMake instead.
+  execute_process(COMMAND "${GIT_EXECUTABLE}" -C "${luajit_source}" rev-parse --path-format=relative --git-path HEAD
                   OUTPUT_VARIABLE luajit_git_head OUTPUT_STRIP_TRAILING_WHITESPACE
                   RESULT_VARIABLE result)
   if(NOT result EQUAL 0)
     message(FATAL_ERROR "Cannot read the LuaJIT submodule revision.")
   endif()
   get_filename_component(luajit_git_head "${luajit_git_head}" ABSOLUTE BASE_DIR "${luajit_source}")
+  if(NOT EXISTS "${luajit_git_head}")
+    message(FATAL_ERROR "LuaJIT Git HEAD dependency does not exist: ${luajit_git_head}")
+  endif()
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${luajit_git_head}")
   list(APPEND luajit_sources "${luajit_git_head}")
 endif()
