@@ -496,6 +496,14 @@ function ReverseDb(file_name) end
 ---@return ReverseLookup?
 function ReverseLookup(dict_name) end
 
+---@class AuxiliaryLookup
+---@field lookup fun(self: self, text: string): string 单字的显示辅助码，多码以空格分隔，未命中时返回空字符串
+
+--- 打开指定辅助码组的数据库，用于查询 aux 转写中以 display 标记的结果。
+---@param group string 辅助码组名，例如 translator/aux 配置的「万象」
+---@return AuxiliaryLookup? 数据库不可用时返回 nil
+function AuxiliaryLookup(group) end
+
 ---@class DictEntry
 ---@field text string
 ---@field comment string
