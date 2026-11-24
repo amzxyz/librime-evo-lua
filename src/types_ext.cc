@@ -11,6 +11,7 @@
 #include <rime/segmentor.h>
 #include <rime/translator.h>
 #include <rime/filter.h>
+#include <rime/dict/auxiliary_db.h>
 #include <rime/dict/reverse_lookup_dictionary.h>
 #include <rime/dict/user_db.h>
 #include <rime/dict/user_dictionary.h>
@@ -197,6 +198,33 @@ namespace ReverseLookupDictionaryReg {
     { NULL, NULL },
   };
 }
+
+namespace AuxiliaryLookupReg {
+using T = AuxiliaryDb;
+
+an<T> make(const string& group) {
+  return an<T>(T::Open(group));
+}
+
+string lookup(T& db, const string& text) {
+  string codes;
+  db.LookupDisplay(text, &codes);
+  return codes;
+}
+
+static const luaL_Reg funcs[] = {
+    {"AuxiliaryLookup", WRAP(make)},
+    {NULL, NULL},
+};
+
+static const luaL_Reg methods[] = {
+    {"lookup", WRAP(lookup)},
+    {NULL, NULL},
+};
+
+static const luaL_Reg vars_get[] = {{NULL, NULL}};
+static const luaL_Reg vars_set[] = {{NULL, NULL}};
+}  // namespace AuxiliaryLookupReg
 
 // leveldb
 namespace DbAccessorReg{
@@ -388,6 +416,7 @@ void LUAWRAPPER_LOCAL types_ext_init(lua_State *L) {
   EXPORT(TranslatorReg, L);
   EXPORT(FilterReg, L);
   EXPORT(ReverseLookupDictionaryReg, L);
+  EXPORT(AuxiliaryLookupReg, L);
   EXPORT(DbAccessorReg, L);
   EXPORT(UserDbReg, L);
   ComponentReg::init(L);
