@@ -24,6 +24,7 @@
 
 #include "lib/lua_export_type.h"
 #include "optional.h"
+#include "system_random.h"
 
 #define ENABLE_TYPES_EXT
 
@@ -2439,6 +2440,8 @@ namespace RimeApiReg {
     { "get_distribution_version", WRAP(get_distribution_version) },
     { "get_user_id", WRAP(get_user_id) },
     { "get_time_ms", WRAP(get_time_ms) },
+    { "get_unix_time_ms", rime_lua::GetUnixTimeMs },
+    { "secure_random_bytes", rime_lua::SecureRandomBytes },
     { "regex_match", WRAP(regex_match) },
     { "regex_search", WRAP(regex_search) },
     { "regex_replace", WRAP(regex_replace) },

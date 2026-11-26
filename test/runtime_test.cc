@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "lib/lua_templates.h"
+#include "system_random.h"
 
 TEST(LuaRuntime, BundledJitAndLibraries) {
   Lua lua;
@@ -64,6 +65,30 @@ TEST(LuaRuntime, WideIntegerBinding) {
     LuaType<unsigned long long>::pushdata(state, value);
     EXPECT_EQ(value, LuaType<unsigned long long>::todata(state, -1));
     lua_pop(state, 1);
+  });
+}
+
+TEST(LuaRuntime, SystemRandomAndUnixTime) {
+  Lua lua;
+  lua.to_state([](lua_State* state) {
+    lua_pushcfunction(state, rime_lua::SecureRandomBytes);
+    lua_setglobal(state, "secure_random_bytes");
+    lua_pushcfunction(state, rime_lua::GetUnixTimeMs);
+    lua_setglobal(state, "get_unix_time_ms");
+    const int result = luaL_dostring(state, R"(
+      assert(secure_random_bytes(0) == '')
+      local a = secure_random_bytes(32)
+      local b = secure_random_bytes(32)
+      assert(type(a) == 'string' and #a == 32)
+      assert(type(b) == 'string' and #b == 32 and a ~= b)
+      assert(#secure_random_bytes(65536) == 65536)
+      for _, n in ipairs({-1, 1.5, 65537, math.huge, 0/0}) do
+        assert(not pcall(secure_random_bytes, n))
+      end
+      assert(not pcall(secure_random_bytes))
+      assert(math.abs(get_unix_time_ms() - os.time() * 1000) < 2000)
+    )");
+    ASSERT_EQ(LUA_OK, result) << lua_tostring(state, -1);
   });
 }
 
