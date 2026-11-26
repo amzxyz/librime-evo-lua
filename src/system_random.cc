@@ -18,7 +18,10 @@
 #include <cstdio>
 #endif
 
-#include "lib/lua.h"
+extern "C" {
+#include <lua.h>
+#include <lauxlib.h>
+}
 
 namespace rime_lua {
 namespace {
