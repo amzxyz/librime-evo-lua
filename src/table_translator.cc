@@ -47,7 +47,6 @@ namespace TableTranslatorReg {
       ACCESS_(encode_commit_history, bool);
       ACCESS_(max_phrase_length, int);
       ACCESS_(max_homographs, int);
-      ACCESS_(enable_charset_filter, bool);
       GET_(sentence_over_completion, bool);
       void set_sentence_over_completion(bool);
       GET_(enable_encoder, bool);
@@ -192,7 +191,6 @@ namespace TableTranslatorReg {
     Get_WMEM(lang_name),                 // string
     Get_WMEM(memorize_callback),         // an<LuaObj> callback function
     // TabletTranslator member
-    Get_WMEM(enable_charset_filter),     // bool
     Get_WMEM(enable_encoder),            // bool
     Get_WMEM(enable_sentence),           // bool
     Get_WMEM(sentence_over_completion),  // bool
@@ -218,7 +216,6 @@ namespace TableTranslatorReg {
   static const luaL_Reg vars_set[] = {
     {"memorize_callback", raw_set_memorize_callback<T>},  // an<LuaObj> callback function
     // TableTranslator member
-    Set_WMEM(enable_charset_filter),     // bool
     Set_WMEM(enable_encoder),            // bool
     Set_WMEM(enable_sentence),           // bool
     Set_WMEM(sentence_over_completion),  // bool

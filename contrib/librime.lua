@@ -644,7 +644,6 @@ Component = {}
 ---@field name_space string
 ---@field lang_name string
 ---@field memorize_callback (fun(translator: TableTranslator, commit_entry: CommitEntry): boolean)?
----@field enable_charset_filter boolean
 ---@field enable_encoder boolean
 ---@field enable_sentence boolean
 ---@field sentence_over_completion boolean
