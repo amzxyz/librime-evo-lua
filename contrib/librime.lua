@@ -504,6 +504,18 @@ function ReverseLookup(dict_name) end
 ---@return AuxiliaryLookup? 数据库不可用时返回 nil
 function AuxiliaryLookup(group) end
 
+--- 只读的 Rewrite 通用键值查询。按完整 UTF-8 键精确匹配，不拆字、不转换句子。
+---@class RewriteLookup
+---@field lookup fun(self: self, key: string): string 第一条结果，未命中返回空字符串；不拆分值中的空格或字符
+---@field lookup_all fun(self: self, key: string): string[] 按 Rewrite 原有顺序返回全部结果，未命中返回空表
+
+--- 打开 build/rewrites 下声明并编译的命名资源；例如 RewriteLookup("charset") 对应 charset.rewrite.bin。
+--- 不要求配置 rewriter 滤镜。资源与原生 Rewriter 共享，重新部署后按原有机制刷新。
+--- 建议在组件 init 中创建并保存对象，在 func 中直接查询。
+---@param name string 资源名，不带 .rewrite.bin 后缀，不是文件路径
+---@return RewriteLookup? 资源不存在、损坏或名称不合法时返回 nil
+function RewriteLookup(name) end
+
 ---@class DictEntry
 ---@field text string
 ---@field comment string

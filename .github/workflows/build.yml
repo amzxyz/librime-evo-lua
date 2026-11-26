@@ -15,8 +15,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {cc: gcc, cxx: g++}
-          - {cc: clang, cxx: clang++}
+          - {cc: gcc, cxx: g++, core: main}
+          - {cc: gcc, cxx: g++, core: dev}
+          - {cc: clang, cxx: clang++, core: dev}
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
@@ -26,7 +27,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: amzxyz/librime-evo
-          ref: main
+          ref: ${{ matrix.core }}
           path: evo
 
       - name: Initialize core dependencies
@@ -83,7 +84,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: amzxyz/librime-evo
-          ref: main
+          ref: dev
           path: evo
 
       - name: Initialize core dependencies

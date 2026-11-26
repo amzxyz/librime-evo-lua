@@ -13,6 +13,7 @@
 #include <rime/filter.h>
 #include <rime/dict/auxiliary_db.h>
 #include <rime/dict/reverse_lookup_dictionary.h>
+#include <rime/dict/rewrite_store.h>
 #include <rime/dict/user_db.h>
 #include <rime/dict/user_dictionary.h>
 #include <rime/gear/memory.h>
@@ -226,6 +227,59 @@ static const luaL_Reg vars_get[] = {{NULL, NULL}};
 static const luaL_Reg vars_set[] = {{NULL, NULL}};
 }  // namespace AuxiliaryLookupReg
 
+// Generic exact lookup of a compiled named rewrite resource.
+namespace RewriteLookupReg {
+using T = RewriteResource;
+
+an<T> make(const string& name) {
+  auto resource = T::Require(name);
+  if (resource && resource->Acquire())
+    return resource;
+  return {};
+}
+
+string lookup(T& resource, const string& key) {
+#ifdef RIME_EVO_REWRITE_LOOKUP
+  string value;
+  resource.LookupFirst(key, &value);
+  return value;
+#else
+  // Older EVO releases already expose the shared resource and exact lookup.
+  vector<string> values;
+  if (auto store = resource.Acquire()) {
+    if (store->Lookup(key, &values) && !values.empty())
+      return std::move(values.front());
+  }
+  return {};
+#endif
+}
+
+vector<string> lookup_all(T& resource, const string& key) {
+  vector<string> values;
+#ifdef RIME_EVO_REWRITE_LOOKUP
+  resource.Lookup(key, &values);
+#else
+  if (auto store = resource.Acquire())
+    store->Lookup(key, &values);
+#endif
+  return values;
+}
+
+static const luaL_Reg funcs[] = {
+    {"RewriteLookup", WRAP(make)},
+    {NULL, NULL},
+};
+
+static const luaL_Reg methods[] = {
+    {"lookup", WRAP(lookup)},
+    {"lookup_all", WRAP(lookup_all)},
+    {NULL, NULL},
+};
+
+static const luaL_Reg vars_get[] = {{NULL, NULL}};
+static const luaL_Reg vars_set[] = {{NULL, NULL}};
+}  // namespace RewriteLookupReg
+
 // leveldb
 namespace DbAccessorReg{
   using T = DbAccessor;
@@ -417,6 +471,7 @@ void LUAWRAPPER_LOCAL types_ext_init(lua_State *L) {
   EXPORT(FilterReg, L);
   EXPORT(ReverseLookupDictionaryReg, L);
   EXPORT(AuxiliaryLookupReg, L);
+  EXPORT(RewriteLookupReg, L);
   EXPORT(DbAccessorReg, L);
   EXPORT(UserDbReg, L);
   ComponentReg::init(L);
