@@ -15,7 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {cc: gcc, cxx: g++, core: main}
           - {cc: gcc, cxx: g++, core: dev}
           - {cc: clang, cxx: clang++, core: dev}
     env:
