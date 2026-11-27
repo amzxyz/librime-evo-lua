@@ -2462,6 +2462,11 @@ namespace SwitcherReg {
     return New<T>(engine);
   }
 
+  bool select_switch(T& self, const string& option, bool value) {
+    Engine* engine = self.attached_engine();
+    return engine && engine->SelectSwitch(option, value);
+  }
+
 
   static const luaL_Reg funcs[] = {
     { "Switcher", WRAP(make) },
@@ -2471,7 +2476,7 @@ namespace SwitcherReg {
   static const luaL_Reg methods[] = {
     { "process_key", WRAPMEM(T::ProcessKey) },
     { "select_next_schema", WRAPMEM(T::SelectNextSchema) },
-    { "is_auto_save", WRAPMEM(T::IsAutoSave) },
+    { "select_switch", WRAP(select_switch) },
     { "refresh_menu", WRAPMEM(T::RefreshMenu) },
     { "activate", WRAPMEM(T::Activate) },
     { "deactivate", WRAPMEM(T::Deactivate) },

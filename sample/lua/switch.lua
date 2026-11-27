@@ -33,14 +33,10 @@ end
 
 -- 切换开关函数
 local function apply_switch(env, keyword, target_state)
-  local ctx = env.engine.context
   local swt = env.switcher
-  local conf = swt.user_config
-  ctx:set_option(keyword, target_state)
-  -- 如果设置了自动保存，则需相应的配置
-  if swt:is_auto_save(keyword) and conf ~= nil then
-    conf:set_bool("var/option/" .. keyword, target_state)
-  end
+  if swt == nil then return false end
+  -- The core owns the active schema's switch state and persistence.
+  return swt:select_switch(keyword, target_state)
 end
 
 local kRejected = 0
