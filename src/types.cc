@@ -629,6 +629,9 @@ namespace EngineReg {
 
   static const luaL_Reg methods[] = {
     { "process_key", WRAPMEM(T::ProcessKey) },
+#ifdef RIME_EVO_SETTINGS
+    { "select_setting", WRAPMEM(T::SelectSetting) },
+#endif
     { "compose", WRAPMEM(T::Compose)},
     { "commit_text", WRAPMEM(T::CommitText) },
     { "apply_schema", WRAP(apply_schema) },
@@ -780,6 +783,18 @@ namespace CommitHistoryReg {
 namespace ContextReg {
   using T = Context;
 
+#ifdef RIME_EVO_SETTINGS
+  // Return a copy: a subsequent selection may replace the underlying list.
+  static vector<string> get_setting_values(T& context, const string& group) {
+    return context.setting_values(group);
+  }
+
+  static string get_setting_value(T& context, const string& group) {
+    const auto& values = context.setting_values(group);
+    return values.size() == 1 ? values.front() : string();
+  }
+#endif
+
   Composition &get_composition(T &t) {
     return t.composition();
   }
@@ -826,6 +841,11 @@ namespace ContextReg {
     { "refresh_non_confirmed_composition", WRAPMEM(T::RefreshNonConfirmedComposition) },
     { "set_option", WRAPMEM(T::set_option) },
     { "get_option", WRAPMEM(T::get_option) },
+#ifdef RIME_EVO_SETTINGS
+    { "get_setting_values", WRAP(get_setting_values) },
+    { "get_setting_value", WRAP(get_setting_value) },
+    { "setting_selected", WRAPMEM(T::setting_selected) },
+#endif
     { "set_property", WRAPMEM(T::set_property) },
     { "get_property", WRAPMEM(T::get_property) },
     { "clear_transient_options", WRAPMEM(T::ClearTransientOptions) },
